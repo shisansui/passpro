@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人中心 - 智能办公控制系统</title>
+    <style>
+        :root {
+            --primary-bg: linear-gradient(135deg, #e5fffa 0%, #ffecdf 100%);
+            --card-1-bg: linear-gradient(135deg, #ffdec4 0%, #ffc9a3 100%);
+            --card-2-bg: linear-gradient(135deg, #c9f0ff 0%, #a0e4ff 100%);
+            --card-3-bg: linear-gradient(135deg, #eddaff 0%, #d8b6ff 100%);
+            --card-4-bg: linear-gradient(135deg, #d7ffd7 0%, #baffb0 100%);
+            --shadow: 0 10px 20px rgba(0, 0, 0, 0.03);
+            --text-dark: #2b2b2b;
+            --text-light: #fff;
+            --border-radius: 22px;
+            --font: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: var(--font);
+            background: #f5f5f7;
+            color: var(--text-dark);
+            line-height: 1.5;
+        }
+
+        .iphone-frame {
+            max-width: 390px;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+            border-radius: 40px;
+            box-shadow: 0 0 0 10px #1a1a1a, 0 15px 50px rgba(0, 0, 0, 0.3);
+            height: 844px;
+            background: var(--primary-bg);
+        }
+
+        .iphone-notch {
+            position: absolute;
+            width: 180px;
+            height: 30px;
+            background: #1a1a1a;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+            z-index: 100;
+        }
+
+        .iphone-home {
+            position: absolute;
+            width: 40%;
+            height: 5px;
+            background: #1a1a1a;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 5px;
+            z-index: 100;
+        }
+
+        .profile-header {
+            padding: 60px 20px 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: #f5f5f5;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-info {
+            text-align: center;
+        }
+
+        .profile-name {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .profile-role {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .profile-stats {
+            display: flex;
+            gap: 30px;
+            margin-top: 10px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .menu-section {
+            padding: 20px;
+            display: grid;
+            gap: 15px;
+            overflow-y: auto;
+            height: calc(100% - 280px);
+            padding-bottom: 100px;
+        }
+
+        .menu-group {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .menu-item:last-child {
+            border-bottom: none;
+        }
+
+        .menu-item:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .menu-icon {
+            width: 24px;
+            height: 24px;
+            margin-right: 12px;
+            opacity: 0.7;
+        }
+
+        .menu-label {
+            flex: 1;
+            font-size: 16px;
+        }
+
+        .menu-arrow {
+            width: 20px;
+            height: 20px;
+            opacity: 0.3;
+        }
+
+        /* 底部导航栏样式 */
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 0 10px;
+            z-index: 1000;
+            border-bottom-left-radius: 40px;
+            border-bottom-right-radius: 40px;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+            border-radius: 20px;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item:hover::before {
+            opacity: 1;
+        }
+        
+        .nav-item.active::before {
+            opacity: 1;
+            background: linear-gradient(135deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.05) 100%);
+        }
+        
+        .nav-icon {
+            width: 20px;
+            height: 20px;
+            margin-bottom: 4px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item.active .nav-icon {
+            transform: translateY(-2px);
+        }
+        
+        .nav-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-dark);
+            opacity: 0.7;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item.active .nav-label {
+            opacity: 1;
+            font-weight: 600;
+        }
+        
+        .nav-indicator {
+            position: absolute;
+            bottom: -2px;
+            width: 4px;
+            height: 4px;
+            background: var(--text-dark);
+            border-radius: 50%;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item.active .nav-indicator {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="iphone-frame">
+        <div class="iphone-notch"></div>
+        <div class="profile-header">
+            <div class="profile-avatar">
+                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIxMDAiIGN5PSI4MCIgcj0iNTAiIGZpbGw9IiNkZGQiLz48Y2lyY2xlIGN4PSIxMDAiIGN5PSIyMzAiIHI9IjEyMCIgZmlsbD0iI2RkZCIvPjwvc3ZnPg==" alt="User">
+            </div>
+            <div class="profile-info">
+                <div class="profile-name">李先生</div>
+                <div class="profile-role">系统管理员</div>
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <div class="stat-value">98%</div>
+                        <div class="stat-label">考勤率</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">15</div>
+                        <div class="stat-label">访客</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">8</div>
+                        <div class="stat-label">会议</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="menu-section">
+            <div class="menu-group">
+                <div class="menu-item">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 15C8.8 15 6 12.2 6 9C6 5.8 8.8 3 12 3C15.2 3 18 5.8 18 9C18 12.2 15.2 15 12 15Z" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M20 22H4C4 18.7 7.6 16 12 16C16.4 16 20 18.7 20 22Z" stroke="currentColor" stroke-width="1.5"/>
+                    </svg>
+                    <span class="menu-label">个人信息</span>
+                    <svg class="menu-arrow" viewBox="0 0 24 24" fill="none">
+                        <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="menu-item">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none">
+                        <rect x="4" y="4" width="16" height="16" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M8 10H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <path d="M8 14H12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                    <span class="menu-label">通行记录</span>
+                    <svg class="menu-arrow" viewBox="0 0 24 24" fill="none">
+                        <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="menu-item">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 8V12L15 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/>
+                    </svg>
+                    <span class="menu-label">考勤统计</span>
+                    <svg class="menu-arrow" viewBox="0 0 24 24" fill="none">
+                        <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="menu-group">
+                <div class="menu-item">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 15C8.8 15 6 12.2 6 9C6 5.8 8.8 3 12 3C15.2 3 18 5.8 18 9C18 12.2 15.2 15 12 15Z" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M20 22H4C4 18.7 7.6 16 12 16C16.4 16 20 18.7 20 22Z" stroke="currentColor" stroke-width="1.5"/>
+                    </svg>
+                    <span class="menu-label">访客管理</span>
+                    <svg class="menu-arrow" viewBox="0 0 24 24" fill="none">
+                        <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="menu-item">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none">
+                        <rect x="4" y="5" width="16" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M8 3V7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <path d="M16 3V7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <path d="M4 11H20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                    <span class="menu-label">会议预约</span>
+                    <svg class="menu-arrow" viewBox="0 0 24 24" fill="none">
+                        <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="menu-group">
+                <div class="menu-item">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 15C8.8 15 6 12.2 6 9C6 5.8 8.8 3 12 3C15.2 3 18 5.8 18 9C18 12.2 15.2 15 12 15Z" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M20 22H4C4 18.7 7.6 16 12 16C16.4 16 20 18.7 20 22Z" stroke="currentColor" stroke-width="1.5"/>
+                    </svg>
+                    <span class="menu-label">系统设置</span>
+                    <svg class="menu-arrow" viewBox="0 0 24 24" fill="none">
+                        <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="menu-item">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 15C8.8 15 6 12.2 6 9C6 5.8 8.8 3 12 3C15.2 3 18 5.8 18 9C18 12.2 15.2 15 12 15Z" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M20 22H4C4 18.7 7.6 16 12 16C16.4 16 20 18.7 20 22Z" stroke="currentColor" stroke-width="1.5"/>
+                    </svg>
+                    <span class="menu-label">关于我们</span>
+                    <svg class="menu-arrow" viewBox="0 0 24 24" fill="none">
+                        <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部导航栏 -->
+        <div class="bottom-nav">
+            <div class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M9 22V12H15V22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span class="nav-label">湃思</span>
+                <div class="nav-indicator"></div>
+            </div>
+            <div class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="4" y="2" width="16" height="20" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                    <circle cx="15" cy="12" r="1.5" fill="currentColor"/>
+                    <path d="M11 12H4" stroke="currentColor" stroke-width="1.5"/>
+                </svg>
+                <span class="nav-label">门禁</span>
+                <div class="nav-indicator"></div>
+            </div>
+            <div class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span class="nav-label">产品</span>
+                <div class="nav-indicator"></div>
+            </div>
+            <div class="nav-item active">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span class="nav-label">我的</span>
+                <div class="nav-indicator"></div>
+            </div>
+        </div>
+
+        <div class="iphone-home"></div>
+    </div>
+
+    <script>
+        // 底部导航栏交互
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const label = this.querySelector('.nav-label').textContent;
+                if (label === '湃思') {
+                    window.location.href = 'integrated_dashboard.html';
+                } else if (label === '门禁') {
+                    window.location.href = 'access_control.html';
+                } else if (label === '产品') {
+                    window.location.href = 'products.html';
+                }
+            });
+        });
+
+        // 菜单项点击事件
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const label = this.querySelector('.menu-label').textContent;
+                if (label === '会议预约') {
+                    window.location.href = 'meeting_reservation.html';
+                }
+            });
+        });
+    </script>
+</body>
+</html> 

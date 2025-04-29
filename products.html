@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>产品中心 - 智能办公控制系统</title>
+    <style>
+        :root {
+            --primary-bg: linear-gradient(135deg, #e5fffa 0%, #ffecdf 100%);
+            --card-1-bg: linear-gradient(135deg, #ffdec4 0%, #ffc9a3 100%);
+            --card-2-bg: linear-gradient(135deg, #c9f0ff 0%, #a0e4ff 100%);
+            --card-3-bg: linear-gradient(135deg, #eddaff 0%, #d8b6ff 100%);
+            --card-4-bg: linear-gradient(135deg, #d7ffd7 0%, #baffb0 100%);
+            --shadow: 0 10px 20px rgba(0, 0, 0, 0.03);
+            --text-dark: #2b2b2b;
+            --text-light: #fff;
+            --border-radius: 22px;
+            --font: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: var(--font);
+            background: #f5f5f7;
+            color: var(--text-dark);
+            line-height: 1.5;
+        }
+
+        .iphone-frame {
+            max-width: 390px;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+            border-radius: 40px;
+            box-shadow: 0 0 0 10px #1a1a1a, 0 15px 50px rgba(0, 0, 0, 0.3);
+            height: 844px;
+            background: var(--primary-bg);
+        }
+
+        .iphone-notch {
+            position: absolute;
+            width: 180px;
+            height: 30px;
+            background: #1a1a1a;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+            z-index: 100;
+        }
+
+        .iphone-home {
+            position: absolute;
+            width: 40%;
+            height: 5px;
+            background: #1a1a1a;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 5px;
+            z-index: 100;
+        }
+
+        .header {
+            padding: 60px 20px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .back-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateY(-2px);
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .menu-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .product-grid {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            overflow-y: auto;
+            height: calc(100% - 120px);
+            padding-bottom: 100px;
+        }
+
+        .product-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 200px;
+            background: #f5f5f5;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #666;
+        }
+
+        .product-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .product-name {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .product-description {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .product-price {
+            font-size: 20px;
+            font-weight: 600;
+            color: #ff6b6b;
+        }
+
+        /* 底部导航栏样式 */
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 0 10px;
+            z-index: 1000;
+            border-bottom-left-radius: 40px;
+            border-bottom-right-radius: 40px;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+            border-radius: 20px;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item:hover::before {
+            opacity: 1;
+        }
+        
+        .nav-item.active::before {
+            opacity: 1;
+            background: linear-gradient(135deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.05) 100%);
+        }
+        
+        .nav-icon {
+            width: 20px;
+            height: 20px;
+            margin-bottom: 4px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item.active .nav-icon {
+            transform: translateY(-2px);
+        }
+        
+        .nav-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-dark);
+            opacity: 0.7;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item.active .nav-label {
+            opacity: 1;
+            font-weight: 600;
+        }
+        
+        .nav-indicator {
+            position: absolute;
+            bottom: -2px;
+            width: 4px;
+            height: 4px;
+            background: var(--text-dark);
+            border-radius: 50%;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item.active .nav-indicator {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="iphone-frame">
+        <div class="iphone-notch"></div>
+        <div class="header">
+            <div class="back-btn" onclick="window.location.href='integrated_dashboard.html'">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <div class="title">产品中心</div>
+            <div class="menu-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="2" fill="currentColor"/>
+                    <circle cx="12" cy="5" r="2" fill="currentColor"/>
+                    <circle cx="12" cy="19" r="2" fill="currentColor"/>
+                </svg>
+            </div>
+        </div>
+
+        <div class="product-grid">
+            <div class="product-card">
+                <div class="product-image">VF200系列</div>
+                <div class="product-info">
+                    <div class="product-name">智能门禁管理终端 VF200</div>
+                    <div class="product-description">支持人脸识别、密码、刷卡等多种验证方式，适用于办公室、小区等场景</div>
+                    <div class="product-price">¥2,999</div>
+                </div>
+            </div>
+
+            <div class="product-card">
+                <div class="product-image">VF300系列</div>
+                <div class="product-info">
+                    <div class="product-name">高级门禁控制器 VF300</div>
+                    <div class="product-description">支持远程控制、访客管理、考勤统计等高级功能，适用于企业园区</div>
+                    <div class="product-price">¥4,999</div>
+                </div>
+            </div>
+
+            <div class="product-card">
+                <div class="product-image">VF400系列</div>
+                <div class="product-info">
+                    <div class="product-name">智能通行管理系统 VF400</div>
+                    <div class="product-description">集成访客管理、考勤系统、门禁控制于一体的综合解决方案</div>
+                    <div class="product-price">¥8,999</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部导航栏 -->
+        <div class="bottom-nav">
+            <div class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M9 22V12H15V22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span class="nav-label">湃思</span>
+                <div class="nav-indicator"></div>
+            </div>
+            <div class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="4" y="2" width="16" height="20" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                    <circle cx="15" cy="12" r="1.5" fill="currentColor"/>
+                    <path d="M11 12H4" stroke="currentColor" stroke-width="1.5"/>
+                </svg>
+                <span class="nav-label">门禁</span>
+                <div class="nav-indicator"></div>
+            </div>
+            <div class="nav-item active">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span class="nav-label">产品</span>
+                <div class="nav-indicator"></div>
+            </div>
+            <div class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span class="nav-label">我的</span>
+                <div class="nav-indicator"></div>
+            </div>
+        </div>
+
+        <div class="iphone-home"></div>
+    </div>
+
+    <script>
+        // 底部导航栏交互
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const label = this.querySelector('.nav-label').textContent;
+                if (label === '湃思') {
+                    window.location.href = 'integrated_dashboard.html';
+                } else if (label === '门禁') {
+                    window.location.href = 'access_control.html';
+                } else if (label === '我的') {
+                    window.location.href = 'profile.html';
+                }
+            });
+        });
+    </script>
+</body>
+</html> 

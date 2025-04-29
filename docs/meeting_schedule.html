@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>会议日程 - 智能办公控制系统</title>
+    <style>
+        :root {
+            --primary-bg: linear-gradient(135deg, #e5fffa 0%, #ffecdf 100%);
+            --card-1-bg: linear-gradient(135deg, #ffdec4 0%, #ffc9a3 100%);
+            --card-2-bg: linear-gradient(135deg, #c9f0ff 0%, #a0e4ff 100%);
+            --card-3-bg: linear-gradient(135deg, #eddaff 0%, #d8b6ff 100%);
+            --card-4-bg: linear-gradient(135deg, #d7ffd7 0%, #baffb0 100%);
+            --shadow: 0 10px 20px rgba(0, 0, 0, 0.03);
+            --text-dark: #2b2b2b;
+            --text-light: #fff;
+            --border-radius: 22px;
+            --font: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: var(--font);
+            padding: 0;
+            min-height: 100vh;
+            overflow-x: hidden;
+            background: #f5f5f7;
+            color: var(--text-dark);
+            line-height: 1.5;
+        }
+        
+        .app-container {
+            max-width: 100%;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding: 0 25px 30px 25px;
+        }
+        
+        .page-header {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 8px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+        }
+        
+        .title {
+            flex: 1;
+        }
+        
+        .title h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            letter-spacing: -0.3px;
+        }
+        
+        .title p {
+            font-size: 15px;
+            opacity: 0.7;
+        }
+        
+        .back-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateY(-2px);
+        }
+        
+        .back-btn svg {
+            width: 22px;
+            height: 22px;
+            opacity: 0.7;
+        }
+        
+        .date-navigation {
+            display: flex;
+            overflow-x: auto;
+            gap: 8px;
+            padding: 8px 0;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            margin-bottom: 10px;
+        }
+        
+        .date-navigation::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .date-item {
+            flex: 0 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px 0;
+            min-width: 54px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .date-item .day-name {
+            font-size: 12px;
+            font-weight: 500;
+            opacity: 0.7;
+        }
+        
+        .date-item .day-number {
+            font-size: 18px;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+        
+        .date-item.active {
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+        }
+        
+        .date-item.active .day-name {
+            opacity: 0.9;
+        }
+        
+        .date-item.today {
+            position: relative;
+        }
+        
+        .date-item.today::after {
+            content: '';
+            position: absolute;
+            bottom: 6px;
+            width: 4px;
+            height: 4px;
+            background: var(--text-dark);
+            border-radius: 50%;
+        }
+        
+        .date-item.active.today::after {
+            background: white;
+        }
+        
+        .meeting-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .meeting-item {
+            background: rgba(255, 255, 255, 0.55);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 18px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .meeting-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            z-index: 1;
+        }
+        
+        .meeting-item.upcoming::before {
+            background: #4CAF50;
+        }
+        
+        .meeting-item.ongoing::before {
+            background: #2196F3;
+        }
+        
+        .meeting-item.completed::before {
+            background: #9E9E9E;
+        }
+        
+        .meeting-item-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: var(--border-radius);
+            z-index: -1;
+            opacity: 0.85;
+        }
+        
+        .meeting-item:nth-child(4n+1) .meeting-item-bg {
+            background: var(--card-1-bg);
+        }
+        
+        .meeting-item:nth-child(4n+2) .meeting-item-bg {
+            background: var(--card-2-bg);
+        }
+        
+        .meeting-item:nth-child(4n+3) .meeting-item-bg {
+            background: var(--card-3-bg);
+        }
+        
+        .meeting-item:nth-child(4n+4) .meeting-item-bg {
+            background: var(--card-4-bg);
+        }
+        
+        .meeting-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .meeting-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .meeting-time {
+            font-size: 13px;
+            opacity: 0.8;
+        }
+        
+        .meeting-room {
+            background: rgba(255, 255, 255, 0.5);
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .meeting-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-top: 8px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .meeting-info {
+            flex: 1;
+        }
+        
+        .meeting-participants {
+            font-size: 13px;
+            margin-bottom: 5px;
+        }
+        
+        .meeting-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 12px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .meeting-action {
+            padding: 6px 12px;
+            border-radius: 50px;
+            border: none;
+            background: rgba(255, 255, 255, 0.7);
+            color: var(--text-dark);
+            font-weight: 500;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .meeting-action:hover {
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateY(-2px);
+        }
+        
+        .meeting-action.primary {
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+        }
+        
+        .meeting-action.primary:hover {
+            background: rgba(0, 0, 0, 0.8);
+        }
+        
+        .meeting-status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 50px;
+            font-size: 11px;
+            font-weight: 500;
+            margin-top: 5px;
+        }
+        
+        .status-upcoming {
+            background: rgba(76, 175, 80, 0.2);
+            color: #2e7d32;
+        }
+        
+        .status-ongoing {
+            background: rgba(33, 150, 243, 0.2);
+            color: #1565c0;
+        }
+        
+        .status-completed {
+            background: rgba(158, 158, 158, 0.2);
+            color: #424242;
+        }
+        
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: var(--border-radius);
+            margin-top: 30px;
+        }
+        
+        .empty-state svg {
+            width: 60px;
+            height: 60px;
+            opacity: 0.3;
+            margin-bottom: 20px;
+        }
+        
+        .empty-state h3 {
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+        
+        .empty-state p {
+            font-size: 14px;
+            opacity: 0.7;
+            margin-bottom: 20px;
+        }
+        
+        .new-meeting-btn {
+            padding: 12px 20px;
+            border-radius: 50px;
+            border: none;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .new-meeting-btn:hover {
+            background: #000;
+            transform: translateY(-2px);
+        }
+        
+        .filter-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .filter-tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50px;
+            padding: 4px;
+        }
+        
+        .filter-tab {
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .filter-tab.active {
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+        }
+        
+        /* iPhone框架 */
+        .iphone-frame {
+            max-width: 390px;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+            border-radius: 40px;
+            box-shadow: 0 0 0 10px #1a1a1a, 0 15px 50px rgba(0, 0, 0, 0.3);
+            height: 844px;
+            padding: 0;
+        }
+        
+        .iphone-notch {
+            position: absolute;
+            width: 180px;
+            height: 30px;
+            background: #1a1a1a;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+            z-index: 100;
+        }
+        
+        .iphone-home {
+            position: absolute;
+            width: 40%;
+            height: 5px;
+            background: #1a1a1a;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 5px;
+            z-index: 100;
+        }
+        
+        .iphone-content {
+            height: 100%;
+            overflow-y: auto;
+            position: relative;
+            z-index: 10;
+            padding: 40px 0 40px 0;
+            scrollbar-width: none;
+            background: var(--primary-bg);
+        }
+        
+        .iphone-content::-webkit-scrollbar {
+            display: none;
+        }
+        
+        /* 底部导航栏样式 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 0 20px;
+            z-index: 1000;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 60px;
+            height: 60px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+            border-radius: 20px;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item:hover::before {
+            opacity: 1;
+        }
+        
+        .nav-item.active::before {
+            opacity: 1;
+            background: linear-gradient(135deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.05) 100%);
+        }
+        
+        .nav-icon {
+            width: 24px;
+            height: 24px;
+            margin-bottom: 4px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item.active .nav-icon {
+            transform: translateY(-2px);
+        }
+        
+        .nav-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-dark);
+            opacity: 0.7;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item.active .nav-label {
+            opacity: 1;
+            font-weight: 600;
+        }
+        
+        .nav-indicator {
+            position: absolute;
+            bottom: -2px;
+            width: 4px;
+            height: 4px;
+            background: var(--text-dark);
+            border-radius: 50%;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item.active .nav-indicator {
+            opacity: 1;
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 420px) {
+            .meeting-item {
+                padding: 16px;
+            }
+            
+            .meeting-content {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .meeting-room {
+                align-self: flex-start;
+            }
+            
+            .bottom-nav {
+                height: 70px;
+            }
+            
+            .nav-item {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .nav-icon {
+                width: 20px;
+                height: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="iphone-frame">
+        <div class="iphone-notch"></div>
+        <div class="iphone-content">
+            <div class="app-container">
+                <div class="page-header">
+                    <div class="header">
+                        <div class="title">
+                            <h1>会议日程</h1>
+                            <p>查看并管理您的会议</p>
+                        </div>
+                        <div class="back-btn" onclick="window.history.back();">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M19 12H5" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M12 19L5 12L12 5" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-row">
+                        <div class="filter-tabs">
+                            <div class="filter-tab active" data-filter="all">全部</div>
+                            <div class="filter-tab" data-filter="upcoming">即将开始</div>
+                            <div class="filter-tab" data-filter="ongoing">进行中</div>
+                        </div>
+                        <button class="new-meeting-btn" onclick="window.location.href='meeting_reservation.html';">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 5V19" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M5 12H19" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            预约会议
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="date-navigation">
+                    <div class="date-item">
+                        <div class="day-name">一</div>
+                        <div class="day-number">10</div>
+                    </div>
+                    <div class="date-item">
+                        <div class="day-name">二</div>
+                        <div class="day-number">11</div>
+                    </div>
+                    <div class="date-item today active">
+                        <div class="day-name">三</div>
+                        <div class="day-number">12</div>
+                    </div>
+                    <div class="date-item">
+                        <div class="day-name">四</div>
+                        <div class="day-number">13</div>
+                    </div>
+                    <div class="date-item">
+                        <div class="day-name">五</div>
+                        <div class="day-number">14</div>
+                    </div>
+                    <div class="date-item">
+                        <div class="day-name">六</div>
+                        <div class="day-number">15</div>
+                    </div>
+                    <div class="date-item">
+                        <div class="day-name">日</div>
+                        <div class="day-number">16</div>
+                    </div>
+                    <div class="date-item">
+                        <div class="day-name">一</div>
+                        <div class="day-number">17</div>
+                    </div>
+                    <div class="date-item">
+                        <div class="day-name">二</div>
+                        <div class="day-number">18</div>
+                    </div>
+                </div>
+                
+                <div class="meeting-list">
+                    <div class="meeting-item ongoing">
+                        <div class="meeting-item-bg"></div>
+                        <div class="meeting-header">
+                            <div>
+                                <div class="meeting-title">周一例会</div>
+                                <div class="meeting-time">09:30 - 10:30</div>
+                            </div>
+                            <div class="meeting-room">B201会议室</div>
+                        </div>
+                        <div class="meeting-content">
+                            <div class="meeting-info">
+                                <div class="meeting-participants">参会人员: 李经理, 张总, 王设计师, +5人</div>
+                                <div class="meeting-status status-ongoing">进行中</div>
+                            </div>
+                        </div>
+                        <div class="meeting-footer">
+                            <button class="meeting-action">会议纪要</button>
+                            <button class="meeting-action primary">进入会议</button>
+                        </div>
+                    </div>
+                    
+                    <div class="meeting-item upcoming">
+                        <div class="meeting-item-bg"></div>
+                        <div class="meeting-header">
+                            <div>
+                                <div class="meeting-title">产品设计评审</div>
+                                <div class="meeting-time">13:30 - 14:30</div>
+                            </div>
+                            <div class="meeting-room">A101会议室</div>
+                        </div>
+                        <div class="meeting-content">
+                            <div class="meeting-info">
+                                <div class="meeting-participants">参会人员: 王设计师, 李产品, 赵开发, +3人</div>
+                                <div class="meeting-status status-upcoming">即将开始</div>
+                            </div>
+                        </div>
+                        <div class="meeting-footer">
+                            <button class="meeting-action">取消</button>
+                            <button class="meeting-action">编辑</button>
+                            <button class="meeting-action primary">查看详情</button>
+                        </div>
+                    </div>
+                    
+                    <div class="meeting-item upcoming">
+                        <div class="meeting-item-bg"></div>
+                        <div class="meeting-header">
+                            <div>
+                                <div class="meeting-title">市场营销讨论</div>
+                                <div class="meeting-time">16:00 - 17:00</div>
+                            </div>
+                            <div class="meeting-room">D302大会议室</div>
+                        </div>
+                        <div class="meeting-content">
+                            <div class="meeting-info">
+                                <div class="meeting-participants">参会人员: 陈经理, 刘市场, 吴销售, +8人</div>
+                                <div class="meeting-status status-upcoming">即将开始</div>
+                            </div>
+                        </div>
+                        <div class="meeting-footer">
+                            <button class="meeting-action">取消</button>
+                            <button class="meeting-action">编辑</button>
+                            <button class="meeting-action primary">查看详情</button>
+                        </div>
+                    </div>
+                    
+                    <div class="meeting-item completed">
+                        <div class="meeting-item-bg"></div>
+                        <div class="meeting-header">
+                            <div>
+                                <div class="meeting-title">晨会</div>
+                                <div class="meeting-time">08:30 - 09:00</div>
+                            </div>
+                            <div class="meeting-room">C102小会议室</div>
+                        </div>
+                        <div class="meeting-content">
+                            <div class="meeting-info">
+                                <div class="meeting-participants">参会人员: 李经理, 王设计师, 张开发</div>
+                                <div class="meeting-status status-completed">已结束</div>
+                            </div>
+                        </div>
+                        <div class="meeting-footer">
+                            <button class="meeting-action">会议纪要</button>
+                            <button class="meeting-action primary">查看回放</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 以下是空状态，当没有会议时显示 -->
+                <div class="empty-state" style="display: none;">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="4" y="5" width="16" height="14" rx="2" stroke="#555" stroke-width="1.5"/>
+                        <path d="M16 3V7" stroke="#555" stroke-width="1.5" stroke-linecap="round"/>
+                        <path d="M8 3V7" stroke="#555" stroke-width="1.5" stroke-linecap="round"/>
+                        <path d="M4 11H20" stroke="#555" stroke-width="1.5" stroke-linecap="round"/>
+                        <path d="M10 15H14" stroke="#555" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                    <h3>今日暂无会议</h3>
+                    <p>当前日期没有安排会议，您可以预约一个新会议</p>
+                    <button class="new-meeting-btn" onclick="window.location.href='meeting_reservation.html';">
+                        预约会议
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="iphone-home"></div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 日期选择功能
+            const dateItems = document.querySelectorAll('.date-item');
+            dateItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    // 移除所有active类
+                    dateItems.forEach(dateItem => dateItem.classList.remove('active'));
+                    // 添加active类到当前点击的元素
+                    this.classList.add('active');
+                    
+                    // 获取日期信息
+                    const dayNumber = this.querySelector('.day-number').textContent;
+                    
+                    // 根据日期切换会议列表
+                    // 这里仅做演示，实际应用中会根据日期从服务器获取会议数据
+                    if (dayNumber === '14' || dayNumber === '16') {
+                        document.querySelector('.meeting-list').style.display = 'none';
+                        document.querySelector('.empty-state').style.display = 'flex';
+                    } else {
+                        document.querySelector('.meeting-list').style.display = 'flex';
+                        document.querySelector('.empty-state').style.display = 'none';
+                    }
+                });
+            });
+            
+            // 过滤功能
+            const filterTabs = document.querySelectorAll('.filter-tab');
+            const meetingItems = document.querySelectorAll('.meeting-item');
+            
+            filterTabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // 移除所有active类
+                    filterTabs.forEach(filterTab => filterTab.classList.remove('active'));
+                    // 添加active类到当前点击的元素
+                    this.classList.add('active');
+                    
+                    const filter = this.dataset.filter;
+                    
+                    // 根据过滤器显示/隐藏会议
+                    meetingItems.forEach(item => {
+                        if (filter === 'all') {
+                            item.style.display = 'block';
+                        } else if (filter === 'upcoming' && item.classList.contains('upcoming')) {
+                            item.style.display = 'block';
+                        } else if (filter === 'ongoing' && item.classList.contains('ongoing')) {
+                            item.style.display = 'block';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+                    
+                    // 检查过滤后是否有会议显示
+                    const hasVisibleMeetings = Array.from(meetingItems).some(item => item.style.display !== 'none');
+                    
+                    if (!hasVisibleMeetings) {
+                        document.querySelector('.meeting-list').style.display = 'none';
+                        document.querySelector('.empty-state').style.display = 'flex';
+                    } else {
+                        document.querySelector('.meeting-list').style.display = 'flex';
+                        document.querySelector('.empty-state').style.display = 'none';
+                    }
+                });
+            });
+            
+            // 会议操作按钮点击事件
+            const meetingActions = document.querySelectorAll('.meeting-action');
+            meetingActions.forEach(action => {
+                action.addEventListener('click', function() {
+                    const actionText = this.textContent.trim();
+                    const meetingTitle = this.closest('.meeting-item').querySelector('.meeting-title').textContent;
+                    
+                    if (actionText === '编辑') {
+                        window.location.href = 'meeting_reservation.html';
+                    } else if (actionText === '取消') {
+                        if (confirm(`确定要取消会议"${meetingTitle}"吗？`)) {
+                            alert(`会议"${meetingTitle}"已取消`);
+                            this.closest('.meeting-item').remove();
+                        }
+                    } else if (actionText === '进入会议' || actionText === '查看详情' || actionText === '查看回放' || actionText === '会议纪要') {
+                        alert(`功能"${actionText}"即将上线`);
+                    }
+                });
+            });
+            
+            // 底部导航栏交互
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    // 移除所有active类
+                    navItems.forEach(navItem => navItem.classList.remove('active'));
+                    // 添加active类到当前点击的元素
+                    this.classList.add('active');
+                    
+                    // 根据点击的导航项执行相应操作
+                    const label = this.querySelector('.nav-label').textContent;
+                    if (label === '产品') {
+                        window.location.href = 'products.html';
+                    } else if (label === '我的') {
+                        window.location.href = 'profile.html';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

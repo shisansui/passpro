@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>门禁管理 - 智能办公控制系统</title>
+    <style>
+        :root {
+            --primary-bg: linear-gradient(135deg, #e5fffa 0%, #ffecdf 100%);
+            --card-1-bg: linear-gradient(135deg, #ffdec4 0%, #ffc9a3 100%);
+            --card-2-bg: linear-gradient(135deg, #c9f0ff 0%, #a0e4ff 100%);
+            --card-3-bg: linear-gradient(135deg, #eddaff 0%, #d8b6ff 100%);
+            --card-4-bg: linear-gradient(135deg, #d7ffd7 0%, #baffb0 100%);
+            --shadow: 0 10px 20px rgba(0, 0, 0, 0.03);
+            --text-dark: #2b2b2b;
+            --text-light: #fff;
+            --border-radius: 22px;
+            --font: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --online-color: #4CAF50;
+            --offline-color: #9E9E9E;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: var(--font);
+            background: #f5f5f7;
+            color: var(--text-dark);
+            line-height: 1.5;
+        }
+
+        .iphone-frame {
+            max-width: 390px;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+            border-radius: 40px;
+            box-shadow: 0 0 0 10px #1a1a1a, 0 15px 50px rgba(0, 0, 0, 0.3);
+            height: 844px;
+            background: var(--primary-bg);
+        }
+
+        .iphone-notch {
+            position: absolute;
+            width: 180px;
+            height: 30px;
+            background: #1a1a1a;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+            z-index: 100;
+        }
+
+        .iphone-home {
+            position: absolute;
+            width: 40%;
+            height: 5px;
+            background: #1a1a1a;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 5px;
+            z-index: 100;
+        }
+
+        .header {
+            padding: 60px 20px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .back-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateY(-2px);
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .menu-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .device-grid {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            overflow-y: auto;
+            height: calc(100% - 120px);
+            padding-bottom: 100px;
+            margin-bottom: 70px;
+        }
+
+        .device-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            position: relative;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            margin-bottom: 15px;
+        }
+
+        .device-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .device-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .device-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+        }
+
+        .device-info {
+            flex: 1;
+        }
+
+        .device-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .device-location {
+            font-size: 14px;
+            opacity: 0.7;
+        }
+
+        .device-status {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+
+        .status-dot.online {
+            background: var(--online-color);
+        }
+
+        .status-dot.offline {
+            background: var(--offline-color);
+        }
+
+        .device-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .action-btn {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: none;
+            background: rgba(255, 255, 255, 0.8);
+            color: var(--text-dark);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+            text-align: center;
+        }
+
+        .action-btn:hover {
+            background: rgba(255, 255, 255, 1);
+        }
+
+        .action-btn.primary {
+            background: var(--text-dark);
+            color: white;
+        }
+
+        .device-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 25px;
+            width: 90%;
+            max-width: 350px;
+            padding: 25px;
+            position: relative;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .device-settings {
+            display: grid;
+            gap: 15px;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .setting-label {
+            font-size: 16px;
+            opacity: 0.8;
+        }
+
+        .setting-value {
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .sync-time {
+            font-size: 14px;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .device-features {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .feature-item {
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 15px;
+            padding: 10px;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        .feature-icon {
+            width: 24px;
+            height: 24px;
+            margin: 0 auto 5px;
+        }
+
+        /* 底部导航栏样式 */
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 0 10px;
+            z-index: 1000;
+            border-bottom-left-radius: 40px;
+            border-bottom-right-radius: 40px;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+            border-radius: 20px;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item:hover::before {
+            opacity: 1;
+        }
+        
+        .nav-item.active::before {
+            opacity: 1;
+            background: linear-gradient(135deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.05) 100%);
+        }
+        
+        .nav-icon {
+            width: 20px;
+            height: 20px;
+            margin-bottom: 4px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item.active .nav-icon {
+            transform: translateY(-2px);
+        }
+        
+        .nav-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-dark);
+            opacity: 0.7;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item.active .nav-label {
+            opacity: 1;
+            font-weight: 600;
+        }
+        
+        .nav-indicator {
+            position: absolute;
+            bottom: -2px;
+            width: 4px;
+            height: 4px;
+            background: var(--text-dark);
+            border-radius: 50%;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item.active .nav-indicator {
+            opacity: 1;
+        }
+
+        /* 添加通行码浮窗样式 */
+        .access-code-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .access-code-content {
+            background: white;
+            border-radius: 25px;
+            width: 90%;
+            max-width: 350px;
+            padding: 25px;
+            position: relative;
+            text-align: center;
+        }
+
+        .qr-code {
+            width: 200px;
+            height: 200px;
+            margin: 20px auto;
+            background: #f5f5f5;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            color: #666;
+        }
+
+        .access-code {
+            font-size: 32px;
+            font-weight: 600;
+            letter-spacing: 5px;
+            margin: 20px 0;
+            color: var(--text-dark);
+        }
+
+        .access-code-timer {
+            font-size: 14px;
+            color: #666;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="iphone-frame">
+        <div class="iphone-notch"></div>
+        <div class="header">
+            <div class="back-btn" onclick="window.location.href='integrated_dashboard.html'">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <div class="title">门禁管理</div>
+            <div class="menu-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="2" fill="currentColor"/>
+                    <circle cx="12" cy="5" r="2" fill="currentColor"/>
+                    <circle cx="12" cy="19" r="2" fill="currentColor"/>
+                </svg>
+            </div>
+        </div>
+
+        <div class="device-grid">
+            <div class="device-card" onclick="showDeviceModal('VF202')">
+                <div class="device-header">
+                    <div class="device-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <rect x="4" y="2" width="16" height="20" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                            <circle cx="15" cy="12" r="1.5" fill="currentColor"/>
+                            <path d="M11 12H4" stroke="currentColor" stroke-width="1.5"/>
+                        </svg>
+                    </div>
+                    <div class="device-info">
+                        <div class="device-name">VF202</div>
+                        <div class="device-location">办公室大门</div>
+                    </div>
+                </div>
+                <div class="device-status">
+                    <span class="status-dot online"></span>
+                    在线
+                </div>
+                <div class="device-actions">
+                    <button class="action-btn">设备配置</button>
+                    <button class="action-btn">通行码开门</button>
+                    <button class="action-btn primary">开门</button>
+                </div>
+            </div>
+
+            <div class="device-card">
+                <div class="device-header">
+                    <div class="device-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <rect x="4" y="2" width="16" height="20" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                            <circle cx="15" cy="12" r="1.5" fill="currentColor"/>
+                            <path d="M11 12H4" stroke="currentColor" stroke-width="1.5"/>
+                        </svg>
+                    </div>
+                    <div class="device-info">
+                        <div class="device-name">VF203</div>
+                        <div class="device-location">会议室</div>
+                    </div>
+                </div>
+                <div class="device-status">
+                    <span class="status-dot online"></span>
+                    在线
+                </div>
+               
+                <div class="device-actions">
+                    <button class="action-btn">设备配置</button>
+                    <button class="action-btn">通行码开门</button>
+                    <button class="action-btn primary">开门</button>
+                </div>
+            </div>
+
+            <div class="device-card">
+                <div class="device-header">
+                    <div class="device-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <rect x="4" y="2" width="16" height="20" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                            <circle cx="15" cy="12" r="1.5" fill="currentColor"/>
+                            <path d="M11 12H4" stroke="currentColor" stroke-width="1.5"/>
+                        </svg>
+                    </div>
+                    <div class="device-info">
+                        <div class="device-name">VF204</div>
+                        <div class="device-location">前台门禁</div>
+                    </div>
+                </div>
+                <div class="device-status">
+                    <span class="status-dot offline"></span>
+                    离线
+                </div>
+                <div class="device-actions">
+                    <button class="action-btn">设备配置</button>
+                    <button class="action-btn">通行码开门</button>
+                    <button class="action-btn primary" disabled>离线</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="device-modal" id="deviceModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-title">设备配置</div>
+                    <div class="close-btn" onclick="hideDeviceModal()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="device-settings">
+                    <div class="setting-item">
+                        <span class="setting-label">语言切换</span>
+                        <span class="setting-value">中文</span>
+                    </div>
+                    <div class="setting-item">
+                        <span class="setting-label">安全模式</span>
+                        <span class="setting-value">开启</span>
+                    </div>
+                    <div class="setting-item">
+                        <span class="setting-label">设备名称</span>
+                        <span class="setting-value">VF202</span>
+                    </div>
+                    <div class="setting-item">
+                        <span class="setting-label">恢复出厂</span>
+                        <span class="setting-value">点击重置</span>
+                    </div>
+                    <div class="setting-item">
+                        <span class="setting-label">设备重启</span>
+                        <span class="setting-value">点击重启</span>
+                    </div>
+                    <div class="setting-item">
+                        <span class="setting-label">固件升级</span>
+                        <span class="setting-value">V2.1.0</span>
+                    </div>
+                    <div class="setting-item">
+                        <span class="setting-label">网络配置</span>
+                        <span class="setting-value">已连接</span>
+                    </div>
+                    <div class="setting-item">
+                        <span class="setting-label">壁纸切换</span>
+                        <span class="setting-value">默认</span>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button class="action-btn" onclick="hideDeviceModal()">取消</button>
+                    <button class="action-btn primary">保存</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 通行码浮窗 -->
+        <div class="access-code-modal" id="accessCodeModal">
+            <div class="access-code-content">
+                <div class="modal-header">
+                    <div class="modal-title">通行码</div>
+                    <div class="close-btn" onclick="hideAccessCodeModal()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="qr-code">
+                    QR
+                </div>
+                <div class="access-code">123456</div>
+                <div class="access-code-timer">有效期剩余: <span id="codeTimer">300</span>秒</div>
+                <div class="modal-actions">
+                    <button class="action-btn" onclick="hideAccessCodeModal()">关闭</button>
+                    <button class="action-btn primary" onclick="refreshAccessCode()">刷新</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部导航栏 -->
+        <div class="bottom-nav">
+            <div class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M9 22V12H15V22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span class="nav-label">湃思</span>
+                <div class="nav-indicator"></div>
+            </div>
+            <div class="nav-item active">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="4" y="2" width="16" height="20" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                    <circle cx="15" cy="12" r="1.5" fill="currentColor"/>
+                    <path d="M11 12H4" stroke="currentColor" stroke-width="1.5"/>
+                </svg>
+                <span class="nav-label">门禁</span>
+                <div class="nav-indicator"></div>
+            </div>
+            <div class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span class="nav-label">产品</span>
+                <div class="nav-indicator"></div>
+            </div>
+            <div class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span class="nav-label">我的</span>
+                <div class="nav-indicator"></div>
+            </div>
+        </div>
+
+        <div class="iphone-home"></div>
+    </div>
+
+    <script>
+        let timerInterval;
+
+        function showDeviceModal(deviceId) {
+            document.getElementById('deviceModal').style.display = 'flex';
+        }
+
+        function hideDeviceModal() {
+            document.getElementById('deviceModal').style.display = 'none';
+        }
+
+        function showAccessCodeModal() {
+            document.getElementById('accessCodeModal').style.display = 'flex';
+            startCodeTimer();
+        }
+
+        function hideAccessCodeModal() {
+            document.getElementById('accessCodeModal').style.display = 'none';
+            clearInterval(timerInterval);
+        }
+
+        function startCodeTimer() {
+            clearInterval(timerInterval);
+            let timeLeft = 300; // 5分钟
+            const timerElement = document.getElementById('codeTimer');
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerElement.textContent = timeLeft;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    refreshAccessCode();
+                }
+            }, 1000);
+        }
+
+        function refreshAccessCode() {
+            // 生成新的6位随机数字
+            const newCode = Math.floor(100000 + Math.random() * 900000);
+            document.querySelector('.access-code').textContent = newCode;
+            startCodeTimer();
+        }
+
+        // 点击模态框外部关闭
+        document.querySelectorAll('.device-modal, .access-code-modal').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.style.display = 'none';
+                    if (this.id === 'accessCodeModal') {
+                        clearInterval(timerInterval);
+                    }
+                }
+            });
+        });
+
+        // 阻止卡片点击事件冒泡到模态框
+        document.querySelectorAll('.modal-content, .access-code-content').forEach(content => {
+            content.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+        });
+
+        // 为所有设备卡片添加点击事件
+        document.querySelectorAll('.device-card').forEach(card => {
+            // 设备配置按钮点击事件
+            const configBtn = card.querySelector('.action-btn:first-child');
+            if (configBtn) {
+                configBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    showDeviceModal(card.querySelector('.device-name').textContent);
+                });
+            }
+
+            // 通行码按钮点击事件
+            const accessCodeBtn = card.querySelector('.action-btn:nth-child(2)');
+            if (accessCodeBtn) {
+                accessCodeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    showAccessCodeModal();
+                });
+            }
+        });
+
+        // 底部导航栏交互
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const label = this.querySelector('.nav-label').textContent;
+                if (label === '湃思') {
+                    window.location.href = 'integrated_dashboard.html';
+                } else if (label === '产品') {
+                    window.location.href = 'products.html';
+                } else if (label === '我的') {
+                    window.location.href = 'profile.html';
+                }
+            });
+        });
+    </script>
+</body>
+</html> 

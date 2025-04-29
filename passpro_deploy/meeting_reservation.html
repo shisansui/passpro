@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>会议预约 - 智能办公控制系统</title>
+    <style>
+        :root {
+            --primary-bg: linear-gradient(135deg, #e5fffa 0%, #ffecdf 100%);
+            --card-1-bg: linear-gradient(135deg, #ffdec4 0%, #ffc9a3 100%);
+            --card-2-bg: linear-gradient(135deg, #c9f0ff 0%, #a0e4ff 100%);
+            --card-3-bg: linear-gradient(135deg, #eddaff 0%, #d8b6ff 100%);
+            --card-4-bg: linear-gradient(135deg, #d7ffd7 0%, #baffb0 100%);
+            --shadow: 0 10px 20px rgba(0, 0, 0, 0.03);
+            --text-dark: #2b2b2b;
+            --text-light: #fff;
+            --border-radius: 22px;
+            --font: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: var(--font);
+            padding: 0;
+            min-height: 100vh;
+            overflow-x: hidden;
+            background: #f5f5f7;
+            color: var(--text-dark);
+            line-height: 1.5;
+        }
+        
+        .app-container {
+            max-width: 100%;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding: 0 25px 30px 25px;
+        }
+        
+        .page-header {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 8px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+        }
+        
+        .title {
+            flex: 1;
+        }
+        
+        .title h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            letter-spacing: -0.3px;
+        }
+        
+        .title p {
+            font-size: 15px;
+            opacity: 0.7;
+        }
+        
+        .back-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateY(-2px);
+        }
+        
+        .back-btn svg {
+            width: 22px;
+            height: 22px;
+            opacity: 0.7;
+        }
+        
+        .reservation-form {
+            background: rgba(255, 255, 255, 0.55);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 22px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .reservation-form::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--card-2-bg);
+            border-radius: var(--border-radius);
+            z-index: -1;
+            opacity: 0.85;
+        }
+        
+        .form-group {
+            margin-bottom: 18px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 12px;
+            border: 1px solid rgba(0,0,0,0.1);
+            background: rgba(255,255,255,0.8);
+            font-size: 15px;
+            font-family: var(--font);
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: rgba(0,0,0,0.2);
+            background: rgba(255,255,255,0.95);
+        }
+        
+        .time-picker {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .time-picker select {
+            flex: 1;
+        }
+        
+        .form-group textarea {
+            height: 80px;
+            resize: none;
+        }
+        
+        .form-footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 25px;
+        }
+        
+        .submit-btn {
+            padding: 14px 24px;
+            border-radius: 50px;
+            border: none;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+            flex: 1;
+        }
+        
+        .submit-btn:hover {
+            background: #000;
+            transform: translateY(-2px);
+        }
+        
+        .cancel-btn {
+            padding: 14px 24px;
+            border-radius: 50px;
+            border: none;
+            background: rgba(255, 255, 255, 0.7);
+            color: var(--text-dark);
+            font-weight: 500;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+            margin-right: 10px;
+        }
+        
+        .cancel-btn:hover {
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateY(-2px);
+        }
+        
+        .recommended-times {
+            margin-top: 20px;
+        }
+        
+        .recommended-times h3 {
+            font-size: 16px;
+            margin-bottom: 12px;
+        }
+        
+        .time-slots {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .time-slot {
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 10px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .time-slot:hover {
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateY(-2px);
+        }
+        
+        .time-slot.active {
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 8px;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            margin-right: 12px;
+        }
+        
+        .checkbox-item input {
+            width: auto;
+            margin-right: 6px;
+        }
+        
+        /* 形状装饰 */
+        .shape {
+            position: absolute;
+            z-index: 0;
+            opacity: 0.4;
+        }
+        
+        .shape-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.25);
+        }
+        
+        .shape-triangle {
+            width: 0;
+            height: 0;
+            border-left: 40px solid transparent;
+            border-right: 40px solid transparent;
+            border-bottom: 60px solid rgba(255,255,255,0.25);
+            transform: rotate(0deg);
+        }
+        
+        /* iPhone框架 */
+        .iphone-frame {
+            max-width: 390px;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+            border-radius: 40px;
+            box-shadow: 0 0 0 10px #1a1a1a, 0 15px 50px rgba(0, 0, 0, 0.3);
+            height: 844px;
+            padding: 0;
+        }
+        
+        .iphone-notch {
+            position: absolute;
+            width: 180px;
+            height: 30px;
+            background: #1a1a1a;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+            z-index: 100;
+        }
+        
+        .iphone-home {
+            position: absolute;
+            width: 40%;
+            height: 5px;
+            background: #1a1a1a;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 5px;
+            z-index: 100;
+        }
+        
+        .iphone-content {
+            height: 100%;
+            overflow-y: auto;
+            position: relative;
+            z-index: 10;
+            padding: 40px 0 40px 0;
+            scrollbar-width: none;
+            background: var(--primary-bg);
+        }
+        
+        .iphone-content::-webkit-scrollbar {
+            display: none;
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 420px) {
+            .reservation-form {
+                padding: 18px;
+            }
+            
+            .form-group {
+                margin-bottom: 15px;
+            }
+            
+            .time-picker {
+                flex-direction: column;
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="iphone-frame">
+        <div class="iphone-notch"></div>
+        <div class="iphone-content">
+            <div class="app-container">
+                <div class="page-header">
+                    <div class="header">
+                        <div class="title">
+                            <h1>会议预约</h1>
+                            <p>请填写会议信息</p>
+                        </div>
+                        <div class="back-btn" onclick="window.history.back();">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M19 12H5" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M12 19L5 12L12 5" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="reservation-form">
+                    <div class="shape shape-circle" style="bottom: -30px; right: -30px;"></div>
+                    <div class="shape shape-triangle" style="top: 20px; right: 20px; transform: rotate(45deg);"></div>
+                    
+                    <div class="form-group">
+                        <label for="room">会议室选择</label>
+                        <select id="room" name="room">
+                            <option value="">请选择会议室</option>
+                            <option value="A101">A101会议室 (12人)</option>
+                            <option value="B201" selected>B201会议室 (20人)</option>
+                            <option value="D302">D302大会议室 (30人)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="meeting-name">会议主题</label>
+                        <input type="text" id="meeting-name" name="meeting-name" placeholder="请输入会议主题">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="date">日期</label>
+                        <input type="date" id="date" name="date" value="2023-06-12">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>时间</label>
+                        <div class="time-picker">
+                            <select id="start-time" name="start-time">
+                                <option value="09:00">09:00</option>
+                                <option value="09:30" selected>09:30</option>
+                                <option value="10:00">10:00</option>
+                                <option value="10:30">10:30</option>
+                                <option value="11:00">11:00</option>
+                                <option value="11:30">11:30</option>
+                                <option value="13:00">13:00</option>
+                                <option value="13:30">13:30</option>
+                                <option value="14:00">14:00</option>
+                                <option value="14:30">14:30</option>
+                                <option value="15:00">15:00</option>
+                                <option value="15:30">15:30</option>
+                                <option value="16:00">16:00</option>
+                                <option value="16:30">16:30</option>
+                                <option value="17:00">17:00</option>
+                            </select>
+                            <select id="end-time" name="end-time">
+                                <option value="09:30">09:30</option>
+                                <option value="10:00">10:00</option>
+                                <option value="10:30" selected>10:30</option>
+                                <option value="11:00">11:00</option>
+                                <option value="11:30">11:30</option>
+                                <option value="12:00">12:00</option>
+                                <option value="13:30">13:30</option>
+                                <option value="14:00">14:00</option>
+                                <option value="14:30">14:30</option>
+                                <option value="15:00">15:00</option>
+                                <option value="15:30">15:30</option>
+                                <option value="16:00">16:00</option>
+                                <option value="16:30">16:30</option>
+                                <option value="17:00">17:00</option>
+                                <option value="17:30">17:30</option>
+                                <option value="18:00">18:00</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="participants">参会人员</label>
+                        <input type="text" id="participants" name="participants" placeholder="请输入参会人员，用逗号分隔">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>会议设备需求</label>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="equipment-projector" name="equipment" value="projector" checked>
+                                <label for="equipment-projector">投影仪</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="equipment-board" name="equipment" value="board" checked>
+                                <label for="equipment-board">白板</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="equipment-video" name="equipment" value="video">
+                                <label for="equipment-video">视频会议</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="equipment-audio" name="equipment" value="audio">
+                                <label for="equipment-audio">音响</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="notes">备注</label>
+                        <textarea id="notes" name="notes" placeholder="请输入会议备注信息"></textarea>
+                    </div>
+                    
+                    <div class="form-footer">
+                        <button class="cancel-btn" onclick="window.history.back();">取消</button>
+                        <button class="submit-btn" id="submit-btn">确认预约</button>
+                    </div>
+                </div>
+                
+                <div class="recommended-times">
+                    <h3>推荐时间段</h3>
+                    <p>根据会议室空闲情况，为您推荐以下时间段：</p>
+                    <div class="time-slots">
+                        <div class="time-slot active">6月12日 09:30-10:30</div>
+                        <div class="time-slot">6月12日 13:30-14:30</div>
+                        <div class="time-slot">6月12日 16:00-17:00</div>
+                        <div class="time-slot">6月13日 10:00-11:00</div>
+                        <div class="time-slot">6月13日 14:00-15:00</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="iphone-home"></div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 时间段点击事件
+            const timeSlots = document.querySelectorAll('.time-slot');
+            timeSlots.forEach(slot => {
+                slot.addEventListener('click', function() {
+                    // 移除所有active类
+                    timeSlots.forEach(s => s.classList.remove('active'));
+                    // 添加active类到当前点击的元素
+                    this.classList.add('active');
+                    
+                    // 解析时间段文本，例如：6月12日 09:30-10:30
+                    const timeText = this.textContent;
+                    const [datePart, timePart] = timeText.split(' ');
+                    const [startTime, endTime] = timePart.split('-');
+                    
+                    // 从日期部分提取月份和日期
+                    const month = datePart.includes('月') ? datePart.split('月')[0] : '';
+                    const day = datePart.includes('日') ? datePart.split('月')[1].replace('日', '') : '';
+                    
+                    // 设置日期
+                    const dateInput = document.getElementById('date');
+                    if (dateInput) {
+                        // 格式为2023-06-12
+                        const year = new Date().getFullYear();
+                        dateInput.value = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+                    }
+                    
+                    // 设置开始时间和结束时间
+                    const startTimeSelect = document.getElementById('start-time');
+                    const endTimeSelect = document.getElementById('end-time');
+                    
+                    if (startTimeSelect && startTime) {
+                        for (let i = 0; i < startTimeSelect.options.length; i++) {
+                            if (startTimeSelect.options[i].value === startTime) {
+                                startTimeSelect.selectedIndex = i;
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if (endTimeSelect && endTime) {
+                        for (let i = 0; i < endTimeSelect.options.length; i++) {
+                            if (endTimeSelect.options[i].value === endTime) {
+                                endTimeSelect.selectedIndex = i;
+                                break;
+                            }
+                        }
+                    }
+                });
+            });
+            
+            // 提交按钮点击事件
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.addEventListener('click', function() {
+                const meetingName = document.getElementById('meeting-name').value;
+                const room = document.getElementById('room').value;
+                
+                if (!meetingName) {
+                    alert('请输入会议主题');
+                    return;
+                }
+                
+                if (!room) {
+                    alert('请选择会议室');
+                    return;
+                }
+                
+                // 模拟预约成功
+                alert('预约成功！您已成功预约' + room + '会议室');
+                // 跳转回会议管理页面
+                window.location.href = 'meeting_room_management.html';
+            });
+        });
+    </script>
+</body>
+</html> 
